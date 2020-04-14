@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find ydlidar)/launch/lidar.launch" />
+  <include file="$(find sensors)/launch/camera.launch" />
+</launch>

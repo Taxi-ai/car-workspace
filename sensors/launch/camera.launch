@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="sensors" name="camera_node" type="camera_pub.py"/>
+
+</launch>
