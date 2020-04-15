@@ -1,0 +1,4 @@
+<launch>
+
+    <node pkg="perception" name="perception_lanes_node" type="edge_pub.py" output="screen"/>
+</launch>
