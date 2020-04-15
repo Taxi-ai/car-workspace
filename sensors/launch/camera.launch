@@ -1,4 +1,3 @@
 <launch>
-    <node pkg="sensors" name="camera_node" type="camera_pub.py"/>
-
+    <node pkg="sensors" name="camera_node" type="camera_pub.py" output="screen"/>
 </launch>
