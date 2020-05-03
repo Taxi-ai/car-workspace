@@ -10,10 +10,10 @@ from edge_detection import *
 from helper import *
 from perception.msg import Lanes
 
+pub = None
 
-def applyLaneDetection(frame, save=False, save_path=None, file_name="out"):
+def applyLaneDetection(frame, save_path=None, file_name="out"):
     
-
     # cv2 read frame as BGR, convert it to RGB
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -88,8 +88,8 @@ def applyLaneDetection(frame, save=False, save_path=None, file_name="out"):
         else:
             out_img = np.dstack((out_img, out_img, out_img))
 
-        file_name += ".mp4"
-        out = cv2.VideoWriter(save_path + file_name, -1, 20, (int(cap.get(3)), int(cap.get(4))))
+        #file_name += ".mp4"
+        #out = cv2.VideoWriter(save_path + file_name, -1, 20, (int(cap.get(3)), int(cap.get(4))))
 
         dir = "Right"  # car far from left or right
         if distance < 0:  # car far away from right line not left line
@@ -119,11 +119,12 @@ def applyLaneDetection(frame, save=False, save_path=None, file_name="out"):
         # weight out_image_undit with original frame
         frame = cv2.addWeighted(out_img_undit, 0.5, frame, 1, 0)
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
-        # cv2.imshow("frame", frame)
+        # fot test
+        cv2.imshow("frame",frame)
+        cv2.waitKey(1)
 
         # write video
-        out.write(frame)
+        #out.write(frame)
     return radius, distance
 
 def callback(data):
@@ -133,16 +134,16 @@ def callback(data):
     
     radius, distance = applyLaneDetection(img)
 
-    msg = Lane
-    msg.header.stamp = rospy.get_rostime()
+    msg = Lanes()
     msg.header.seq= data.header.seq
+    msg.header.stamp = rospy.get_rostime()
     msg.header.frame_id=str(data.header.seq)
-    msg.radius = radius
-    msg.distance = distance
-
+    msg.radius.data = float(radius)
+    msg.displacement.data = float(distance)
     pub.publish(msg)
 
 def listener():
+    global pub
     rospy.init_node('perception_lanes_node', anonymous=False)
     pub = rospy.Publisher('perception/lanes_topic', Lanes )
     rospy.Subscriber('sensors/camera_topic',Image,callback)
@@ -157,17 +158,25 @@ if __name__ == "__main__":
     dist = None
     out = None
     save = False
+
+    rospack = rospkg.RosPack()
     if save:
+        save_path = rospack.get_path('perception') + "/src/lane-detection"
+        file_name = "test_res"
         if not os.path.isdir(save_path):
             raise FileNotFoundError(save_path, " Not Exist!")
         file_name += ".mp4"
-        out = cv2.VideoWriter(save_path + file_name, -1, 20, (int(cap.get(3)), int(cap.get(4))))
-    rospack = rospkg.RosPack()
+        #out = cv2.VideoWriter(save_path + file_name, -1, 20, (int(cap.get(3)), int(cap.get(4))))
     path = rospack.get_path('perception')+"/src/lane-detection/perspective_tf.pickle"
     with open(path, "rb") as p:
         perspective_matrix = pickle.load(p)
         M = perspective_matrix["M"]
         Minv = perspective_matrix["Minv"]
+
+    #TODO:
+    # * calibrate camera ans save its Matrix then use it in commented code below.
+    # * if we want to save visulization of output = finish save video code.
+
 
     #if cam_cal:
     #    if not os.path.isfile(cam_cal):
