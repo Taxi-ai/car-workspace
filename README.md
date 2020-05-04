@@ -5,19 +5,25 @@
 
 * camera publish node
 * lidar publish node
+*  lane detection node
 
 ## TODO
 * add IMU sensor node
-* try to use sensor_msgs/Image message type in camera node
 
 ## code structure 
 ```
 
-- ydlidar "packge for our ydlidar" 
-- sensors "package to manage all sensors"
+* ydlidar "packge for our ydlidar" 
+* sensors "package to manage all sensors"
 |   - msg "contain our custom type messages"
 |   - scripts "our python files for publush and subscripe"
 |   - launch "launch file to run nodes"
+* perception "package contain all perception work."
+|   - msg "contain our custom type messages"
+|   - launch "launch file to run nodes"
+|   - src "contain different perception methods"
+|   |   - lane-detection
+
 
 - README.md
 ```
