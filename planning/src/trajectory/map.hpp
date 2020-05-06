@@ -1,3 +1,6 @@
+#ifndef MAP_H
+#define MAP_H
+
 #include <vector>
 #include <fstream>
 #include <sstream>
@@ -39,3 +42,5 @@ Map::Map(string map_path)
     map_waypoint_y.push_back(tempY);
   }
 }
+
+#endif
