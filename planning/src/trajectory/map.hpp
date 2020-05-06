@@ -16,9 +16,9 @@ using std::vector;
 class Map
 {
 public:
-  Map(string map_path);
-  vector<double> &getWaypointX() { return map_waypoint_x; };
-  vector<double> &getWaypointY() { return map_waypoint_y; };
+  Map(string map_path = "mapData.csv");
+  vector<double> getWaypointX() const { return map_waypoint_x; };
+  vector<double> getWaypointY() const { return map_waypoint_y; };
 
 private:
   int laneNum{2};
