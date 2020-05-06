@@ -21,7 +21,6 @@ public:
   vector<double> getWaypointY() const { return map_waypoint_y; };
 
 private:
-  int laneNum{2};
   float laneWidth{40}; // in cm
   vector<double> map_waypoint_x;
   vector<double> map_waypoint_y;
