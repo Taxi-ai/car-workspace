@@ -17,7 +17,7 @@ using std::vector;
 struct WayPoint
 {
   /* data */
-  float x, y; // x -- > d && y -- > s
+  double x, y; // x -- > d && y -- > s
   int laneNum;
 };
 
@@ -39,7 +39,7 @@ Map::Map(string map_path)
   //map_path = ros::package::getPath("planning") + "/src/trajectory/" + map_path;
   std::ifstream in_map(map_path, std::ifstream::in);
   string line;
-  float tempX, tempY;
+  double tempX, tempY;
   int laneNum;
   char temp;
   while (getline(in_map, line))

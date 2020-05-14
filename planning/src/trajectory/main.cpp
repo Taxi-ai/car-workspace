@@ -16,7 +16,7 @@ Path that well return from path planning should be list of waypoint nodes as fir
 and goal nood at the end.
 */
 
-vector<vector<float>> genPoints(Car &car, int pointNum, vector<WayPoint> &path)
+vector<vector<double>> genPoints(Car &car, int pointNum, vector<WayPoint> &path)
 {
 	/*
 		Generate (N = point num )points in the middle of current car lane using next N waypoint
@@ -29,7 +29,7 @@ vector<vector<float>> genPoints(Car &car, int pointNum, vector<WayPoint> &path)
 	*/
 	float x = car.x, y = car.y;
 	int WayPointIdx;
-	vector<vector<float>> points;
+	vector<vector<double>> points;
 	while (pointNum--)
 	{
 		WayPointIdx = NextWaypoint(x, y, car.yaw, path);
@@ -47,7 +47,7 @@ vector<vector<float>> genPoints(Car &car, int pointNum, vector<WayPoint> &path)
 	return points;
 }
 
-void shift(Car &car, vector<float> &ptsx, vector<float> &ptsy)
+void shift(Car &car, vector<double> &ptsx, vector<double> &ptsy)
 {
 	/*
 		shift points givin in ptsx and ptsy using car x, y and yaw to make car as the origin.
@@ -67,19 +67,17 @@ int main()
 	Map map;
 	Car car;
 	// in current map data y -- > d and x -- > s where s && d is frenet corrdinat
-	float goalX, goalY; // this point should be get from mobil app (I think using web API)
-	int lane = 0;
+	double goalX, goalY; // this point should be get from mobil app (I think using web API)
+	int lane = 0, numPoints = 50;
 	vector<WayPoint> path; // this path should come from web backend
-	vector<vector<float>> next_w;
-	vector<float> ptsx, ptsy;
+
 	if (TEST)
 	{
 		goalX = 0;
 		goalY = 100;
 
 		car.speed = 1; // --- m/s
-		vector<float> next_x, next_y;
-		for (float i = 0; i < goalY; i += 10)
+		for (double i = 0; i < goalY; i += 10)
 		{
 			path.push_back({0, i});
 		}
@@ -87,13 +85,51 @@ int main()
 
 	//TODO:
 	// * generat next 50 x,y points to move forward
-	next_w = genPoints(car, 3, path);
-	for (auto p : next_w)
+	while (!ARRIVED)
 	{
-		ptsx.push_back(p[0]);
-		ptsy.push_back(p[1]);
-	}
+		vector<vector<double>> next_w;
+		vector<double> ptsx, ptsy;
 
-	//shift pts to make car the origin = make our calc easy
-	shift(car, ptsx, ptsy);
+		next_w = genPoints(car, 3, path);
+		for (auto p : next_w)
+		{
+			ptsx.push_back(p[0]);
+			ptsy.push_back(p[1]);
+		}
+
+		//shift pts to make car the origin = make our calc easy
+		shift(car, ptsx, ptsy);
+
+		tk::spline s;
+		s.set_points(ptsx, ptsy);
+		vector<double> next_x_vals, next_y_vals;
+
+		double target_x = 30;
+		double target_y = s(target_x);
+		double target_dist = sqrt((target_x) * (target_x) + (target_y) * (target_y));
+
+		double x_add_on = 0;
+
+		//double dist_inc = 0.5;
+		for (int i = 1; i <= numPoints; i++)
+		{
+			double N = (target_dist / (0.02 * 49.5 / 2.24));
+			double x_p = x_add_on + (target_x / N);
+			double y_p = s(x_p);
+
+			x_add_on = x_p;
+
+			double x_ref = x_p;
+			double y_ref = y_p;
+
+			x_p = (x_ref * cos(car.yaw) - y_ref * sin(car.yaw));
+			y_p = (x_ref * sin(car.yaw) + y_ref * cos(car.yaw));
+
+			x_p += car.x;
+			y_p += car.y;
+
+			next_x_vals.push_back(x_p);
+			next_y_vals.push_back(y_p);
+		}
+	}
 }
