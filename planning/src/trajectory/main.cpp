@@ -5,6 +5,8 @@
 #include "map.hpp"
 #include "car.hpp"
 #include "helper.hpp"
+#include "spline.h"
+
 using std::cout;
 using std::vector;
 
@@ -32,18 +34,19 @@ vector<vector<float>> genPoints(Car &car, int pointNum, vector<WayPoint> &path)
 	{
 		WayPointIdx = NextWaypoint(x, y, car.yaw, path);
 		if (WayPointIdx != -1)
-			points.push_back({path[WayPointIdx].x, path[WayPointIdx].y});
+			points.push_back({path[WayPointIdx].x + (20 + 40 * car.lane), path[WayPointIdx].y});
 		else
 			break;
 	}
 	// car finished path
-	if(points.size()==0)
+	if (points.size() == 0)
 	{
 		ARRIVED = true;
-		return {{-1,-1}};
+		return {{-1, -1}};
 	}
 	return points;
 }
+
 int main()
 {
 	Map map;
@@ -52,7 +55,8 @@ int main()
 	float goalX, goalY; // this point should be get from mobil app (I think using web API)
 	int lane = 0;
 	vector<WayPoint> path; // this path should come from web backend
-
+	vector<vector<float>> next_w;
+	vector<float> ptsx, ptsy;
 	if (TEST)
 	{
 		goalX = 0;
@@ -68,4 +72,11 @@ int main()
 
 	//TODO:
 	// * generat next 50 x,y points to move forward
+	next_w = genPoints(car, 3, path);
+	for(auto p: next_w)
+	{
+		ptsx.push_back(p[0]);
+		ptsy.push_back(p[1]);
+	}
+
 }
