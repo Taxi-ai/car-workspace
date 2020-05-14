@@ -47,6 +47,21 @@ vector<vector<float>> genPoints(Car &car, int pointNum, vector<WayPoint> &path)
 	return points;
 }
 
+void shift(Car &car, vector<float> &ptsx, vector<float> &ptsy)
+{
+	/*
+		shift points givin in ptsx and ptsy using car x, y and yaw to make car as the origin.
+	*/
+	for (int i = 0; i < ptsx.size(); i++)
+	{
+		double shift_x = ptsx[i] - car.x;
+		double shift_y = ptsy[i] - car.x;
+
+		ptsx[i] = (shift_x * cos(0 - car.yaw) - shift_y * sin(0 - car.yaw));
+		ptsy[i] = (shift_x * sin(0 - car.yaw) + shift_y * cos(0 - car.yaw));
+	}
+}
+
 int main()
 {
 	Map map;
@@ -73,10 +88,12 @@ int main()
 	//TODO:
 	// * generat next 50 x,y points to move forward
 	next_w = genPoints(car, 3, path);
-	for(auto p: next_w)
+	for (auto p : next_w)
 	{
 		ptsx.push_back(p[0]);
 		ptsy.push_back(p[1]);
 	}
 
+	//shift pts to make car the origin = make our calc easy
+	shift(car, ptsx, ptsy);
 }
