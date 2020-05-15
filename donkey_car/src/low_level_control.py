@@ -94,7 +94,7 @@ class DkLowLevelCtrl():
     def run(self):
 
         #--- Set the control rate
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(1)#10
 
         while not rospy.is_shutdown():
             print self._last_time_cmd_rcv, self.is_controller_connected
