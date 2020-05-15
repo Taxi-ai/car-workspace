@@ -4,14 +4,14 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-// TODO : uncomment this affter finish
-//#include <ros/package.h>
+#include <ros/package.h>
 
 using std::string;
 using std::vector;
 
 /*
   load map data file which contain road waypoints in this format (x,y,NumOfLanes)
+  after we connect car with back-end we should don't use this class
 */
 
 struct WayPoint
@@ -35,8 +35,7 @@ private:
 
 Map::Map(string map_path)
 {
-  // TODO : uncomment this affter finish
-  //map_path = ros::package::getPath("planning") + "/src/trajectory/" + map_path;
+  map_path = ros::package::getPath("planning") + "/src/trajectory/" + map_path;
   std::ifstream in_map(map_path, std::ifstream::in);
   string line;
   double tempX, tempY;

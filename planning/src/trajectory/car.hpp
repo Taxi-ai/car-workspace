@@ -5,7 +5,7 @@ class Car
 {
 public:
   // all measurements in m && m/s
-  double x{0};
+  double x{60};
   double y{0};
   float yaw{0}; // TODO make sure IMU return it as rad or deg and edit where we use yaw 
   double speed{0};

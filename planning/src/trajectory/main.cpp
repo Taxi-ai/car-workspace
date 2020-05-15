@@ -2,6 +2,9 @@
 #include <vector>
 #include <math.h>
 
+#include "ros/ros.h"
+#include "geometry_msgs/PoseArray.h"
+
 #include "map.hpp"
 #include "car.hpp"
 #include "helper.hpp"
@@ -27,23 +30,31 @@ vector<vector<double>> genPoints(Car &car, int pointNum, vector<WayPoint> &path)
 		return:
 			* vector of vector of points -- >{x,y}, of generated points
 	*/
-	float x = car.x, y = car.y;
+	double x = car.x, y = car.y;
 	int WayPointIdx;
 	vector<vector<double>> points;
+
 	while (pointNum--)
 	{
 		WayPointIdx = NextWaypoint(x, y, car.yaw, path);
 		if (WayPointIdx != -1)
+		{
 			points.push_back({path[WayPointIdx].x + (20 + 40 * car.lane), path[WayPointIdx].y});
+			x = path[WayPointIdx].x;
+			y = path[WayPointIdx].y;
+		}
+
 		else
 			break;
 	}
+
 	// car finished path
 	if (points.size() == 0)
 	{
 		ARRIVED = true;
 		return {{-1, -1}};
 	}
+
 	return points;
 }
 
@@ -62,35 +73,77 @@ void shift(Car &car, vector<double> &ptsx, vector<double> &ptsy)
 	}
 }
 
-int main()
+int main(int argc, char **argv)
 {
+
+	// init node with name trajectory
+	ros::init(argc, argv, "planning_traj");
+
+	ros::NodeHandle node;
+
+	ros::Publisher pub = node.advertise<geometry_msgs::PoseArray>("trajectory", 2);
+
+	ros::Rate loop_rate(10);
+
 	Map map;
 	Car car;
 	// in current map data y -- > d and x -- > s where s && d is frenet corrdinat
+	// TODO : accept goal point from back-end server
 	double goalX, goalY; // this point should be get from mobil app (I think using web API)
+
 	int lane = 0, numPoints = 50;
 	vector<WayPoint> path; // this path should come from web backend
 
 	if (TEST)
 	{
-		goalX = 0;
-		goalY = 100;
+		goalX = 20;
+		goalY = 172;
 
-		car.speed = 1; // --- m/s
+		car.speed = 0.5; // --- m/s
+		car.x = 20 + car.lane * 40;
+		car.yaw = M_PI / 2;
 		for (double i = 0; i < goalY; i += 10)
 		{
 			path.push_back({0, i});
 		}
 	}
 
-	//TODO:
-	// * generat next 50 x,y points to move forward
-	while (!ARRIVED)
+	vector<double> prev_x, prev_y;
+	while (ros::ok() && !ARRIVED)
 	{
 		vector<vector<double>> next_w;
 		vector<double> ptsx, ptsy;
+		int prev_path_size = prev_x.size();
 
-		next_w = genPoints(car, 3, path);
+		// we want new path to be tangent to current car yaw
+		if (prev_path_size < 2)
+		{
+			double prev_car_x = car.x - cos(car.yaw);
+			double prev_car_y = car.y - sin(car.yaw);
+			ptsx.push_back(prev_car_x);
+			ptsx.push_back(car.x);
+
+			ptsy.push_back(prev_car_y);
+			ptsy.push_back(car.y);
+		}
+
+		else
+		{
+			double ref_x = prev_x[prev_path_size - 1];
+			double ref_y = prev_y[prev_path_size - 1];
+
+			double ref_x_prev = prev_x[prev_path_size - 2];
+			double ref_y_prev = prev_y[prev_path_size - 2];
+
+			double ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
+
+			ptsx.push_back(ref_x_prev);
+			ptsx.push_back(ref_x);
+
+			ptsy.push_back(ref_y_prev);
+			ptsy.push_back(ref_y);
+		}
+		next_w = genPoints(car, 6, path);
 		for (auto p : next_w)
 		{
 			ptsx.push_back(p[0]);
@@ -104,16 +157,17 @@ int main()
 		s.set_points(ptsx, ptsy);
 		vector<double> next_x_vals, next_y_vals;
 
-		double target_x = 30;
+		double target_x = 100;
 		double target_y = s(target_x);
 		double target_dist = sqrt((target_x) * (target_x) + (target_y) * (target_y));
 
+		// car speed in m/s and points in cm so /100 convert from m -> cm
+		double N = (target_dist / (0.1 * car.speed * 100));
+
 		double x_add_on = 0;
 
-		//double dist_inc = 0.5;
 		for (int i = 1; i <= numPoints; i++)
 		{
-			double N = (target_dist / (0.02 * 49.5 / 2.24));
 			double x_p = x_add_on + (target_x / N);
 			double y_p = s(x_p);
 
@@ -130,6 +184,48 @@ int main()
 
 			next_x_vals.push_back(x_p);
 			next_y_vals.push_back(y_p);
+
+			prev_x = next_x_vals;
+			prev_y = next_y_vals;
 		}
+		// generate msg
+		geometry_msgs::PoseArray msg;
+		msg.header.stamp = ros::Time::now();
+		for (int i = 0; i < 50; i++)
+		{
+			// to make sure path will not pass goal point
+			if (int(next_y_vals[i]) > goalY)
+			{
+				// to make sure that we reach exactly the goal with no error (here it was 5 cm error)
+				geometry_msgs::Pose point;
+				point.position.x = goalX;
+				point.position.y = goalY;
+				point.position.z = 0;
+				ARRIVED = true;
+				break;
+			}
+			geometry_msgs::Pose point;
+			point.position.x = next_x_vals[i];
+			point.position.y = next_y_vals[i];
+			point.position.z = 0;
+
+			msg.poses.push_back(point);
+		}
+		pub.publish(msg);
+
+		// update car pos to be last trajectory point in last path
+		if (TEST)
+		{
+			car.x = next_x_vals[49];
+			car.y = next_y_vals[49];
+		}
+		loop_rate.sleep();
 	}
+	ROS_INFO("Path finished");
+	// TODO
+	/*
+		* convert this to work when get path from web back-end or from any topic we sub to it
+		* make it generate new next x and y with service as controller request when it finish last one
+		* after finish reach goal, listen to new path and work again if it come.
+	*/
 }
