@@ -12,6 +12,8 @@ import numpy as np
 #import pygame
 #pygame.init()
 v=0.12
+way_list=[[-181.3353216786993, 80.53986286885691, 1.5],[-181.3868905774473, 56.897194181192845, 3.8642730118254875],[-181.3353216786993, 80.53986286885691, 1.5],[-181.3868905774473, 56.897194181192845, 3.8642730118254875],[-181.39365660987602, 39.819383248956, 5.572054365851686],[-181.3353216786993, 80.53986286885691, 1.5],[-181.3353216786993, 80.53986286885691, 1.5]]
+
 class DBWNode(object):
     def __init__(self):
         rospy.init_node('dbw_node')
@@ -30,7 +32,7 @@ class DBWNode(object):
         self._set_throttle       = 0
         self._set_brake          = 0
         self._set_steer          = 0
-        self._waypoints          = [[-181.3353216786993, 80.53986286885691, 1.5],[-181.3353216786993, 80.53986286885691, 1.5],[-181.3353216786993, 80.53986286885691, 1.5]]
+        self._waypoints          = way_list 
         self._conv_rad_to_steer  = 180.0 / 70.0 / np.pi
         self._pi                 = np.pi
         self._2pi                = 2.0 * np.pi
@@ -47,7 +49,9 @@ class DBWNode(object):
         self.loop()
     
     def update_waypoints_cb(self, new_waypoints):
-        self._waypoints = new_waypoints
+        for p in data.position:
+        	
+        	self._waypoints.append([p.x,p.y,0.12])
 
     def get_commands(self):
         return self._set_throttle, self._set_steer, self._set_brake
@@ -144,7 +148,7 @@ class DBWNode(object):
 
             # 4. update
             steer_output = steer_expect
-            rospy.loginfo("steer:%d ",steer_output)
+            rospy.loginfo("steer:%f ",steer_output)
             throttle_output =v
 
             #steer_output = 0.05
@@ -180,7 +184,7 @@ class DBWNode(object):
             throttle,steering,brake = self.get_commands()
             it=it+1
             
-            rospy.loginfo("pub %d  steer:%d "%(it ,steering))
+            rospy.loginfo("pub %d  steer:%f "%(it ,steering))
             
             self.publish(throttle, brake, steering)
             rate.sleep()
