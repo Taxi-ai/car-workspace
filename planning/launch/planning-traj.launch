@@ -1,0 +1,4 @@
+<launch>
+
+    <node pkg="planning" name="planning_traj" type="trajectory_node" output="screen"/>
+</launch>
