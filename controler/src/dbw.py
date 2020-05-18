@@ -48,9 +48,9 @@ class DBWNode(object):
         self.loop()
     
     def update_waypoints_cb(self, new_waypoints):
-        for p in data.position:
-        	
-        	self._waypoints.append([p.x,p.y,0.12])
+        for p in new_waypoints.poses:
+        	print("x: " + str(p.position.x) + "y: " + str(p.position.y))
+        	self._waypoints.append([p.position.x,p.position.y,0.12])
 
     def get_commands(self):
         return self._set_throttle, self._set_steer, self._set_brake
