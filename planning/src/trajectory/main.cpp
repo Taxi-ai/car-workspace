@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle node;
 
-	ros::Publisher pub = node.advertise<geometry_msgs::PoseArray>("trajectory", 2);
+	ros::Publisher pub = node.advertise<geometry_msgs::PoseArray>("final_waypoints", 2);
 
 	ros::Rate loop_rate(10);
 
@@ -91,13 +91,13 @@ int main(int argc, char **argv)
 	// TODO : accept goal point from back-end server
 	double goalX, goalY; // this point should be get from mobil app (I think using web API)
 
-	int lane = 0, numPoints = 50;
+	int lane = 0, numPoints = 10;
 	vector<WayPoint> path; // this path should come from web backend
 
 	if (TEST)
 	{
 		goalX = 20;
-		goalY = 172;
+		goalY = 432;
 
 		car.speed = 0.5; // --- m/s
 		car.x = 20 + car.lane * 40;
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
 		vector<vector<double>> next_w;
 		vector<double> ptsx, ptsy;
 		int prev_path_size = prev_x.size();
-
+		std::cout << "prev path size: " << prev_path_size << "\n";
 		// we want new path to be tangent to current car yaw
 		if (prev_path_size < 2)
 		{
@@ -143,12 +143,23 @@ int main(int argc, char **argv)
 			ptsy.push_back(ref_y_prev);
 			ptsy.push_back(ref_y);
 		}
-		next_w = genPoints(car, 6, path);
+		next_w = genPoints(car, 3, path);
+
+		if (next_w.size() == 1) // path finished and genPoint send -1,-1
+			continue;
+		
 		for (auto p : next_w)
 		{
 			ptsx.push_back(p[0]);
 			ptsy.push_back(p[1]);
 		}
+
+		/*
+		for(int i=0;i<ptsx.size();i++)
+		{
+			std::cout<<"x: "<<ptsx[i]<<"y: "<<ptsy[i]<<"\n"; 
+		}
+		*/
 
 		//shift pts to make car the origin = make our calc easy
 		shift(car, ptsx, ptsy);
@@ -188,11 +199,13 @@ int main(int argc, char **argv)
 			prev_x = next_x_vals;
 			prev_y = next_y_vals;
 		}
+		int nex_waypoints_size = next_x_vals.size();
 		// generate msg
 		geometry_msgs::PoseArray msg;
 		msg.header.stamp = ros::Time::now();
-		for (int i = 0; i < 50; i++)
+		for (int i = 0; i < nex_waypoints_size; i++)
 		{
+			//std::cout<<"x: "<<next_x_vals[i]
 			// to make sure path will not pass goal point
 			if (int(next_y_vals[i]) > goalY)
 			{
@@ -202,6 +215,7 @@ int main(int argc, char **argv)
 				point.position.y = goalY;
 				point.position.z = 0;
 				ARRIVED = true;
+				msg.poses.push_back(point);
 				break;
 			}
 			geometry_msgs::Pose point;
@@ -216,12 +230,14 @@ int main(int argc, char **argv)
 		// update car pos to be last trajectory point in last path
 		if (TEST)
 		{
-			car.x = next_x_vals[49];
-			car.y = next_y_vals[49];
+
+			car.x = next_x_vals[nex_waypoints_size - 1];
+			car.y = next_y_vals[nex_waypoints_size - 1];
 		}
 		loop_rate.sleep();
 	}
 	ROS_INFO("Path finished");
+	ros::spin();
 	// TODO
 	/*
 		* convert this to work when get path from web back-end or from any topic we sub to it
