@@ -16,7 +16,7 @@ def camera_node():
     rate = rospy.Rate(10) # 10hz
     if test:
         rospack = rospkg.RosPack()
-        test_video_path = rospack.get_path('sensors') + "/scripts/test_video.mp4"
+        test_video_path = rospack.get_path('sensors') + "/scripts/project_video.mp4"
         if not os.path.isfile(test_video_path):
                 raise FileNotFoundError(test_video_path, " not Exist!")
         cam = cv2.VideoCapture(test_video_path) # for test
@@ -30,6 +30,8 @@ def camera_node():
         msg.header.stamp = rospy.get_rostime()
         msg.header.seq= seq
         msg.header.frame_id=str(seq)
+        msg.width = frame.shape[0]
+        msg.height = frame.shape[1]
         msg.data = pickle.dumps(frame,protocol=2)
         pub.publish(msg)
         seq +=1
