@@ -45,7 +45,7 @@ def camera_node():
     cv2.destroyAllWindows()
     
 if __name__ == '__main__':
-    test = True
+    test = False
     try:
         camera_node()
     except rospy.ROSInterruptException:

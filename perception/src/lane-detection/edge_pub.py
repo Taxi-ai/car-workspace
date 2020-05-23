@@ -26,7 +26,7 @@ def applyLaneDetection(frame, save_path=None, file_name="out"):
 
     # transform image to bird view
     warped = warped_img(edges, M)
-
+    cv2.imshow("warped", warped)
         
 
     # if line not detected, apply sliding window
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     mtx = None
     dist = None
     out = None
-    save = False
+    save = True
 
     rospack = rospkg.RosPack()
     if save:
