@@ -75,17 +75,17 @@ def apply_edge_detection(img):
     HSV = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     yellow = cv2.inRange(HSV, (20, 100, 100), (50, 255, 255))
 
-    sensitivity_1 = 68
+    sensitivity_1 = 100
     white = cv2.inRange(HSV, (0, 0, 255 - sensitivity_1), (255, 20, 255))
 
-    sensitivity_2 = 60
+    sensitivity_2 = 100
     HSL = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
     white_2 = cv2.inRange(HSL, (0, 255 - sensitivity_2, 0), (255, 255, sensitivity_2))
 
     white_3 = cv2.inRange(img, (200, 200, 200), (255, 255, 255))
-
+    #bit_layer = white | white_2 | white_3 
     bit_layer = red_threshed | V_threshed | yellow | white | white_2 | white_3
-    return bit_layer
+    return bit_layer 
 
 
 def sliding_window(img, nwindows, width, minpix=50, draw=False):
@@ -193,3 +193,32 @@ def search_around_poly(line, warped_img, margin=100):
     x = nonzerox[lane_inds]
     y = nonzeroy[lane_inds]
     return x, y
+
+
+# *********** new **********
+ 
+def colorFilter(img):
+    hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+    lowerYellow = np.array([18,94,140])
+    upperYellow = np.array([48,255,255])
+    lowerWhite = np.array([0, 0, 175])
+    upperWhite = np.array([255, 255, 255])
+    maskedWhite= cv2.inRange(hsv,lowerWhite,upperWhite)
+    maskedYellow = cv2.inRange(hsv, lowerYellow, upperYellow)
+    combinedImage = cv2.bitwise_or(maskedWhite,maskedYellow)
+    return combinedImage
+ 
+ 
+def thresholding(img):
+    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    kernel = np.ones((5,5))
+    imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 0)
+    imgCanny = cv2.Canny(imgBlur, 50, 100)
+    #imgClose = cv2.morphologyEx(imgCanny, cv2.MORPH_CLOSE, np.ones((10,10)))
+    imgDial = cv2.dilate(imgCanny,kernel,iterations=1)
+    imgErode = cv2.erode(imgDial,kernel,iterations=1)
+ 
+    imgColor = colorFilter(img)
+    combinedImage = cv2.bitwise_or(imgColor, imgErode)
+ 
+    return combinedImage,imgCanny,imgColor

@@ -3,6 +3,7 @@ import rospy
 import cv2
 import pickle
 import rospkg
+import numpy as np
 
 from line import Line
 from sensor_msgs.msg import Image
@@ -24,9 +25,9 @@ def applyLaneDetection(frame, save_path=None, file_name="out"):
     # get edges in image
     edges = apply_edge_detection(frame)
 
+    #cv2.imshow("warped", frame)
     # transform image to bird view
     warped = warped_img(edges, M)
-    cv2.imshow("warped", warped)
         
 
     # if line not detected, apply sliding window
@@ -131,22 +132,28 @@ def callback(data):
     # convert ros image to normal image
     ros_img = data.data
     img = pickle.loads(ros_img)
+    print(img.shape)
+    cv2.imshow("test",img)
     
-    radius, distance = applyLaneDetection(img)
+    #radius, distance = applyLaneDetection(img)
 
-    msg = Lanes()
-    msg.header.seq= data.header.seq
-    msg.header.stamp = rospy.get_rostime()
-    msg.header.frame_id=str(data.header.seq)
-    msg.radius.data = float(radius)
-    msg.displacement.data = float(distance)
-    pub.publish(msg)
+    #msg = Lanes()
+    #msg.header.seq= data.header.seq
+    #msg.header.stamp = rospy.get_rostime()
+    #msg.header.frame_id=str(data.header.seq)
+    #msg.radius.data = float(radius)
+    #msg.displacement.data = float(distance)
+    #pub.publish(msg)
 
 def listener():
     global pub
     rospy.init_node('perception_lanes_node', anonymous=False)
     pub = rospy.Publisher('perception/lanes_topic', Lanes )
     rospy.Subscriber('sensors/camera_topic',Image,callback)
+    cv2.waitKey(1)
+  
+    #closing all open windows  
+    cv2.destroyAllWindows()
     rospy.loginfo("Lane Detection started..")
     rospy.spin()
 
@@ -168,11 +175,16 @@ if __name__ == "__main__":
         file_name += ".mp4"
         #out = cv2.VideoWriter(save_path + file_name, -1, 20, (int(cap.get(3)), int(cap.get(4))))
     path = rospack.get_path('perception')+"/src/lane-detection/perspective_tf.pickle"
+    """
     with open(path, "rb") as p:
         perspective_matrix = pickle.load(p)
         M = perspective_matrix["M"]
         Minv = perspective_matrix["Minv"]
-
+    """
+    src = np.float32([[150,350],[430,350],[640,480],[0,480]])
+    dst = np.float32([[0,0],[640,0],[640,480],[0,480]])
+    
+    M,Minv = perspective_tf(src,dst)
     #TODO:
     # * calibrate camera ans save its Matrix then use it in commented code below.
     # * if we want to save visulization of output = finish save video code.
@@ -190,3 +202,4 @@ if __name__ == "__main__":
     left_line = Line(5)
     right_line = Line(5)
     listener()
+    
