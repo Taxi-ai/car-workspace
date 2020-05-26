@@ -41,7 +41,7 @@ def camera_node():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     # When everything done, release the capture
-    cap.release()
+    cam.release()
     cv2.destroyAllWindows()
     
 if __name__ == '__main__':
