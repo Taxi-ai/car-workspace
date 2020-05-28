@@ -24,9 +24,9 @@ static tcar_state car_state = READY;
 
 static string data_cmd ;
 
-#define MAX_LEFT_STEER  460
-#define CENTER_STEER 	333
-#define MAX_RIGHT_STEER 260
+#define MAX_LEFT_STEER  455
+#define CENTER_STEER 	360
+#define MAX_RIGHT_STEER 265
 
 #define THROTTLE_FORWARD_PWM  460      //#pwm value for max forward throttle
 #define THROTTLE_REVERSE_PWM  270     // #pwm value for max reverse throttle
@@ -41,7 +41,7 @@ float t_center= 0.0;
 
 static int throttle = THROTTLE_STOPPED_PWM;
 static int steer = CENTER_STEER;
-float v = 1.0;//470; // const speed
+int v = 400;//470; // const speed
 
 //functions used by the periodic function
 //############### ---- start section ---- ################
@@ -200,7 +200,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle node;
     ros::Subscriber sub = node.subscribe("planning/cmd", 10000, planning_cb);
   	ros::Publisher pub = node.advertise<geometry_msgs::Twist>("cmd_vel", 100);
-  	ros::Rate loop_rate(2);
+  	ros::Rate loop_rate(10);
 	 //fsm_control::servo_list servos_msg;
 	int llane_c,lturn_c,rturn_c = 1; //some counters to publish sequence of commands during the same state
 
@@ -239,7 +239,7 @@ int main(int argc, char **argv)
 				msg.linear.x = throttle;//THROTTLE_REVERSE_PWM;
 				pub.publish(msg);
 				++stop_c;
-				ros::Duration(0.3).sleep();
+				ros::Duration(1).sleep();
   	  			break;
   	  			case 2:
   	  			//cout<<throttle<<endl;
@@ -248,6 +248,7 @@ int main(int argc, char **argv)
     			pub.publish(msg);
     			stop_c=1;
     			ros::Duration(1.0).sleep();
+			car_state = READY;
     			break;
     			}
         	break;
