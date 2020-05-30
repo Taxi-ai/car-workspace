@@ -16,7 +16,9 @@ typedef enum
     LEFT_LANE,
     RIGHT_LANE,
     LEFT_TURN,
-    RIGHT_TURN
+    RIGHT_TURN,
+	KLEFT,
+	KRIGHT
 }tcar_state;
 
 static tcar_state car_state = READY;
@@ -60,6 +62,11 @@ static void keep_lane_func(void)
 	 ROS_INFO("From KEEP_LANE_Func");
     if (data_cmd == "stop")
         car_state = STOP;
+	//else if (data_cmd == "kleft")
+    //    car_state = KLEFT;
+	//else if (data_cmd == "kright")
+    //    car_state = KRIGHT;
+	
 	else if (data_cmd == "right_lane")
         car_state = RIGHT_LANE;
     else if (data_cmd == "left_lane")
@@ -222,11 +229,29 @@ int main(int argc, char **argv)
         	break;
         
         	case KEEP_LANE:
-            	throttle = v;
+            	 if (data_cmd == "kleft"){
+					throttle = v;
+   
+				msg.angular.z  = steer+5;//t_center;//steer;
+				msg.linear.x = throttle;//throttle;
+				pub.publish(msg);}
+
+				 if (data_cmd == "rleft"){
+					throttle = v;
+   
+				msg.angular.z  = steer-5;//t_center;//steer;
+				msg.linear.x = throttle;//throttle;
+				pub.publish(msg);
+				 }
+	//else if (data_cmd == "kright")
+    //    car_state = KRIGHT;
+				else{
+				throttle = v;
    
 				msg.angular.z  = steer;//t_center;//steer;
 				msg.linear.x = throttle;//throttle;
 				pub.publish(msg);
+				}
         	break;
         	
         	case STOP:
@@ -382,7 +407,6 @@ int main(int argc, char **argv)
 				
         	break;
     	}
-	
 		ROS_INFO("listening");
 		
 		ros::spinOnce();
@@ -396,8 +420,3 @@ int main(int argc, char **argv)
 return 0;
 
 }
-
-
-
-
-//ROS_INFO("update data_cmd: [%s]", data_cmd.c_str());
