@@ -334,13 +334,51 @@ int main(int argc, char **argv)
         	break;
         
         	case RIGHT_TURN:
-            	msg.angular.z = 0.0;//t_max_right;//MAX_RIGHT_STEER;
+            	int static tright_c =1;
+        	switch(tright_c){
+        		case 1:
+            	throttle = v;
+    			
+				msg.angular.z = 0.2;
+				msg.linear.x = throttle;//THROTTLE_REVERSE_PWM;
 				pub.publish(msg);
+				++tright_c;
+				ros::Duration(1).sleep();
+  	  			break;
+  	  			case 2:
+  	  			//cout<<throttle<<endl;
+    			throttle = THROTTLE_STOPPED_PWM;
+    		    msg.linear.x = throttle;// THROTTLE_STOPPED_PWM;
+    			pub.publish(msg);
+    			tright_c=1;
+    			ros::Duration(1.0).sleep();
+			//car_state = READY;
+    			break;
+    			}
         	break;
         
         	case LEFT_TURN:
-            	msg.angular.z = 0.0;//MAX_LEFT_STEER;
+            	int static tleft_c =1;
+        	switch(tleft_c){
+        		case 1:
+            	throttle = v;
+    			
+				msg.angular.z = -0.2;
+				msg.linear.x = throttle;//THROTTLE_REVERSE_PWM;
 				pub.publish(msg);
+				++tleft_c;
+				ros::Duration(1).sleep();
+  	  			break;
+  	  			case 2:
+  	  			//cout<<throttle<<endl;
+    			throttle = THROTTLE_STOPPED_PWM;
+    		    msg.linear.x = throttle;// THROTTLE_STOPPED_PWM;
+    			pub.publish(msg);
+    			tleft_c=1;
+    			ros::Duration(1.0).sleep();
+			car_state = READY;
+    			break;
+    			}
 				
         	break;
     	}
