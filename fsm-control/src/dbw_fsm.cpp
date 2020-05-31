@@ -222,36 +222,37 @@ int main(int argc, char **argv)
     	{
         	case READY:
             	throttle = THROTTLE_STOPPED_PWM;
-    			steer = CENTER_STEER;
-   				msg.angular.z = steer;//CENTER_STEER;
-				msg.linear.x = throttle;//THROTTLE_STOPPED_PWM;
-				pub.publish(msg);
+    			    steer = CENTER_STEER;
+   				    msg.angular.z = steer;//CENTER_STEER;
+				      msg.linear.x = throttle;//THROTTLE_STOPPED_PWM;
+				      pub.publish(msg);
         	break;
         
         	case KEEP_LANE:
             	 if (data_cmd == "kleft"){
-					throttle = v;
+					        throttle = v;
+                  msg.angular.z  = steer+20;//t_center;//steer;
+				          msg.linear.x = throttle;//throttle;
+				          pub.publish(msg);
+                  ros::Duration(1).sleep();
+                  data_cmd = "keep";
+                }
+				       else if (data_cmd == "kright"){
+					        throttle = v;
    
-				msg.angular.z  = steer+5;//t_center;//steer;
-				msg.linear.x = throttle;//throttle;
-				pub.publish(msg);}
-
-				 if (data_cmd == "rleft"){
-					throttle = v;
-   
-				msg.angular.z  = steer-5;//t_center;//steer;
-				msg.linear.x = throttle;//throttle;
-				pub.publish(msg);
-				 }
-	//else if (data_cmd == "kright")
-    //    car_state = KRIGHT;
-				else{
-				throttle = v;
-   
-				msg.angular.z  = steer;//t_center;//steer;
-				msg.linear.x = throttle;//throttle;
-				pub.publish(msg);
-				}
+          				msg.angular.z  = steer-20;//t_center;//steer;
+          				msg.linear.x = throttle;//throttle;
+          				pub.publish(msg);
+                  ros::Duration(1).sleep();
+                  data_cmd = "keep";
+				       }
+				      else{
+          				throttle = v;
+             
+          				msg.angular.z  = CENTER_STEER;//t_center;//steer;
+          				msg.linear.x = throttle;//throttle;
+          				pub.publish(msg);
+				      }
         	break;
         	
         	case STOP:
@@ -260,7 +261,7 @@ int main(int argc, char **argv)
         		case 1:
             	throttle = THROTTLE_REVERSE_PWM;
     			
-				//msg.angular.z = steer;
+				msg.angular.z = steer;
 				msg.linear.x = throttle;//THROTTLE_REVERSE_PWM;
 				pub.publish(msg);
 				++stop_c;
@@ -280,131 +281,97 @@ int main(int argc, char **argv)
         	
         	case RIGHT_LANE:
         			static int rlane_c=1;
-        			throttle = 1.0;
+        			throttle = v;
             	switch(rlane_c){
             		case 1:
-            		steer = MAX_RIGHT_STEER;
-            	msg.linear.x = throttle;
-            	msg.angular.z = steer;//t_max_right;//MAX_RIGHT_STEER;
-				pub.publish(msg);
-				++rlane_c;
-  	  			//cout<<throttle<<endl;
-			 ros::Duration(5.0).sleep();
-				
-  	  			break;	
-  	  			case  2:
-  	  			msg.linear.x = throttle;
-  	  			msg.angular.z =0.0;//t_center; //CENTER_STEER;
-				pub.publish(msg);
-				++rlane_c;
- ros::Duration(5.0).sleep();
-				break;
-				case 3:
-				msg.linear.x = throttle;
-				msg.angular.z = 0.5;//t_max_left;//MAX_LEFT_STEER;
-				pub.publish(msg);
-				++rlane_c;
- ros::Duration(5.0).sleep();
-				break;
-				case 4:
-				msg.linear.x = throttle;
-				msg.angular.z = 0.0;//t_center;//CENTER_STEER;
-				pub.publish(msg);
-				rlane_c =1;
- ros::Duration(5.0).sleep();
-    			break;
-    			//throttle = v;
-    		    //msg.linear.x = 1.0;//throttle;
-    			//pub.publish(msg);
-    			}
+              		steer = MAX_RIGHT_STEER;
+                	msg.linear.x = throttle;
+                	msg.angular.z = steer;//t_max_right;//MAX_RIGHT_STEER;
+    			      	pub.publish(msg);
+    				      ++rlane_c;
+      	  			  //cout<<throttle<<endl;
+  			          ros::Duration(2.0).sleep();
+    	  			  break;	
+                          
+    	  			  case  2:
+        	  			msg.linear.x = throttle;
+        	  			msg.angular.z =CENTER_STEER;
+  				        pub.publish(msg);
+  				        ++rlane_c;
+                 ros::Duration(1.0).sleep();
+  				      break;
+                                                  
+        				case 3:
+          				msg.linear.x = throttle;
+          				msg.angular.z = MAX_LEFT_STEER;
+          				pub.publish(msg);
+          				++rlane_c;
+                  ros::Duration(2.0).sleep();
+  				      break;
+                                                   
+                case 4:
+          			  car_state = KEEP_LANE;
+                  data_cmd = "keep";
+          			break;
+                }
         	break;
         
         	case LEFT_LANE:
-            		static int llane_c=1;
+  		        static int llane_c=1;
+        			throttle = v;
             	switch(llane_c){
             		case 1:
-            	msg.linear.x = 1.0;
-            	msg.angular.z = 0.2;//t_max_right;//MAX_RIGHT_STEER;
-				pub.publish(msg);
-				++llane_c;
-  	  			//cout<<throttle<<endl;
- ros::Duration(0.2).sleep();
-  	  			break;
-  	  			case  2:
-  	  			msg.linear.x = 1.0;
-  	  			msg.angular.z =0.0;//t_center; //CENTER_STEER;
-				pub.publish(msg);
-				++llane_c;
- ros::Duration(.5).sleep();
-				break;
-				case 3:
-				msg.linear.x = 1.0;
-				msg.angular.z =- 0.2;//t_max_left;//MAX_LEFT_STEER;
-				pub.publish(msg);
-				++llane_c;
- ros::Duration(0.2).sleep();
-				break;
-				case 4:
-				msg.linear.x = 1.0;
-				msg.angular.z = 0.0;//t_center;//CENTER_STEER;
-				pub.publish(msg);
-				llane_c =1;
- ros::Duration(.50).sleep();
-				
-    			break;
-    			//throttle = v;
-    		    //msg.linear.x = 1.0;//throttle;
-    			//pub.publish(msg);
-    			}
+              		steer = MAX_LEFT_STEER;
+                	msg.linear.x = throttle;
+                	msg.angular.z = steer;//t_max_right;//MAX_RIGHT_STEER;
+    			      	pub.publish(msg);
+    				      ++llane_c;
+  			          ros::Duration(2.0).sleep();
+    	  			  break;	
+                          
+    	  			  case  2:
+        	  			msg.linear.x = throttle;
+        	  			msg.angular.z =CENTER_STEER;
+  				        pub.publish(msg);
+  				        ++llane_c;
+                 ros::Duration(1.0).sleep();
+  				      break;
+                                                  
+        				case 3:
+          				msg.linear.x = throttle;
+          				msg.angular.z = MAX_RIGHT_STEER;
+          				pub.publish(msg);
+          				++llane_c;
+                  ros::Duration(2.0).sleep();
+  				      break;
+                                                   
+                case 4:
+          			  car_state = KEEP_LANE;
+                  data_cmd = "keep";
+          			break;
+                }
         	break;
         
         	case RIGHT_TURN:
-            	int static tright_c =1;
-        	switch(tright_c){
-        		case 1:
             	throttle = v;
     			
-				msg.angular.z = 0.2;
-				msg.linear.x = throttle;//THROTTLE_REVERSE_PWM;
-				pub.publish(msg);
-				++tright_c;
-				ros::Duration(1).sleep();
-  	  			break;
-  	  			case 2:
-  	  			//cout<<throttle<<endl;
-    			throttle = THROTTLE_STOPPED_PWM;
-    		    msg.linear.x = throttle;// THROTTLE_STOPPED_PWM;
-    			pub.publish(msg);
-    			tright_c=1;
-    			ros::Duration(1.0).sleep();
-			//car_state = READY;
-    			break;
-    			}
+				      msg.angular.z = MAX_RIGHT_STEER;
+				      msg.linear.x = throttle;//THROTTLE_REVERSE_PWM;
+				      pub.publish(msg);
+				      ros::Duration(1.2).sleep();
+			        car_state = KEEP_LANE;
+				      data_cmd = "keep";
         	break;
         
         	case LEFT_TURN:
-            	int static tleft_c =1;
-        	switch(tleft_c){
-        		case 1:
             	throttle = v;
     			
-				msg.angular.z = -0.2;
-				msg.linear.x = throttle;//THROTTLE_REVERSE_PWM;
-				pub.publish(msg);
-				++tleft_c;
-				ros::Duration(1).sleep();
-  	  			break;
-  	  			case 2:
-  	  			//cout<<throttle<<endl;
-    			throttle = THROTTLE_STOPPED_PWM;
-    		    msg.linear.x = throttle;// THROTTLE_STOPPED_PWM;
-    			pub.publish(msg);
-    			tleft_c=1;
-    			ros::Duration(1.0).sleep();
-			car_state = READY;
-    			break;
-    			}
-				
+				      msg.angular.z = MAX_LEFT_STEER;
+				      msg.linear.x = throttle;//THROTTLE_REVERSE_PWM;
+				      pub.publish(msg);
+				      ros::Duration(1.2).sleep();
+			        car_state = KEEP_LANE;
+				      data_cmd = "keep";
         	break;
     	}
 		ROS_INFO("listening");
