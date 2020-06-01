@@ -67,25 +67,15 @@ def apply_edge_detection(img):
     :param img: source image
     :return: binary image with edges detected
     """
+    
+    THRES_MIN = 127
+    THRES_MAX = 255
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    gray = cv2.blur(gray, (5, 5))
 
-
-
-    red_threshed = threshold_channel(channel_Isolate(img, 'R'), (220, 255))
-    V_threshed = threshold_channel(channel_Isolate(img, 'V'), (220, 255))
-    HSV = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-    yellow = cv2.inRange(HSV, (20, 100, 100), (50, 255, 255))
-
-    sensitivity_1 = 100
-    white = cv2.inRange(HSV, (0, 0, 255 - sensitivity_1), (255, 20, 255))
-
-    sensitivity_2 = 100
-    HSL = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
-    white_2 = cv2.inRange(HSL, (0, 255 - sensitivity_2, 0), (255, 255, sensitivity_2))
-
-    white_3 = cv2.inRange(img, (200, 200, 200), (255, 255, 255))
-    #bit_layer = white | white_2 | white_3 
-    bit_layer = red_threshed | V_threshed | yellow | white | white_2 | white_3
-    return bit_layer 
+    _, threshold_img = cv2.threshold(
+        gray, THRES_MIN, THRES_MAX, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    return threshold_img 
 
 
 def sliding_window(img, nwindows, width, minpix=50, draw=False):
