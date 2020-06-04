@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="fsm_control" name="dbw_fsm" type="dbw_fsm" output="screen"/>
+  <node pkg="fsm_control" name="servo_setter" type="servo_setter.py" output="screen"/>
+</launch>
