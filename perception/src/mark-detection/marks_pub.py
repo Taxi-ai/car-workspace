@@ -10,10 +10,6 @@ from std_msgs.msg import String
 from std_msgs.msg import Int16 as Int
 from sensor_msgs.msg import Image
 
-# ******** for test ***********
-# Import the PCA9685 module.
-#import Adafruit_PCA9685
-
 
 def perspective_tf(src, dst):
     """
@@ -43,9 +39,7 @@ def warped_img(img, M):
 def detectPoint(img):
     global passedPoint, PREVE_FRAM_ID, CURR_FRAM_ID
     CURR_FRAM_ID += 1
-    #cv2.circle(img, (100, 300), 2, (0, 255, 0), 3)
-    #cv2.circle(img, (540, 300), 2, (0, 255, 0), 3)
-    #cv2.imshow("img", img)
+
     img = warped_img(img, M)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.blur(gray, (5, 5))
@@ -54,23 +48,19 @@ def detectPoint(img):
         gray, THRES_MIN, THRES_MAX, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     contours, _ = cv2.findContours(
         threshold_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    #cv2.imshow("thresh", threshold_img)
-    
+
     if contours is not None:
         for cnt in contours:
             area = cv2.arcLength(cnt, True)
             apprx = cv2.approxPolyDP(cnt, 0.02 * area, True)
             center, radius = cv2.minEnclosingCircle(cnt)
             if len(cnt) > 5:
-                _,size,angle = cv2.fitEllipse(cnt)
+                _, size, angle = cv2.fitEllipse(cnt)
             else:
                 size = [0]
                 angle = 0
             # try to make sure that contour is our circle
-            #if len(apprx) == POINT_NUM_THRESH and radius >= 100 and radius <= 200 and area < AREA_THRESH_MAX and area > AREA_THRESH_MIN:
             if size[0] > 120 and size[0] < 300 and len(apprx) == 8 and radius >= 100 and radius <= 200 and area < AREA_THRESH_MAX and area > AREA_THRESH_MIN:
-                #print("area = ",area," apprx = ",len(apprx)," radius = ",radius)
-                #print("elliose: [size = " + str(size) + " ]" + "[ angle = " + str(angle) + " ]")
                 # to avoid count same point in every frame!
                 if passedPoint == 0:
                     passedPoint += 1
@@ -80,41 +70,31 @@ def detectPoint(img):
 
                 PREVE_FRAM_ID = CURR_FRAM_ID
                 cv2.drawContours(img, [apprx], 0, (0, 255, 0), 3)
-            """
-            else:
-                print("[Not] area = ",area," apprx = ",len(apprx)," radius = ",radius)
-                print("[Not] elliose: [size = " + str(size) + " ]" + "[ angle = " + str(angle) + " ]")
-            
-    cv2.imshow("Contours", img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        return
-    """
+
 
 def callback(data):
-    global PULS
+    global PULS, CMD
     # convert ros image to normal image
     ros_img = data.data
     img = pickle.loads(ros_img)
     detectPoint(img)
-    #pub.publish(passedPoint)
-    cmd = ""
+
     if passedPoint == path_points:
-        cmd = "stop"
-        PULS = 300
-        # pwm.set_pwm(1,0,PULS)
-        PULS = 370
+        CMD = "stop"
     elif passedPoint < path_points:
-        cmd = "keep"
-        PULS = 450
+        CMD = "keep"
     else:
+        CMD = "stop"
         rospy.loginfo("ERROR Passed points > path points!")
-    # pwm.set_pwm(1,0,PULS)
-    pub_cmd.publish(cmd)
-    st = "CMD : " + cmd
-    rospy.loginfo(st)
-    st = "PULS = " + str(PULS)
-    rospy.loginfo(st)
+
     rospy.loginfo("passed Points %d", passedPoint)
+
+
+def talker():
+    while not rospy.is_shutdown():
+        pub_points.publish(CMD)
+
+        rate.sleep()
 
 
 if __name__ == "__main__":
@@ -133,16 +113,10 @@ if __name__ == "__main__":
     PREVE_FRAM_ID = 0
     CURR_FRAM_ID = 0
     path_points = 0
-
-    # ********** for test *********
-    #pwm = Adafruit_PCA9685.PCA9685()
-    PULS = 370
-    # pwm.set_pwm(1, 0, PULS)  # init car
-    # *******************************
+    CMD = "ready"
 
     rospy.init_node('perception_points_node', anonymous=False)
-    #pub_points = rospy.Publisher('perception/points_topic', Int)
-    pub_cmd = rospy.Publisher('planning/cmd', String)
+    pub_points = rospy.Publisher('perception/points_topic', String)
     rospy.Subscriber('sensors/camera_topic', Image, callback)
     rospy.loginfo("point-detection Detection started..")
 
@@ -155,5 +129,5 @@ if __name__ == "__main__":
 
     if M is None:
         M, Minv = perspective_tf(src, dst)
-
-    rospy.spin()
+    rate = rospy.Rate(10)  # 10hz
+    talker()
