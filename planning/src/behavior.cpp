@@ -10,13 +10,13 @@ bool in_keep_state = false;
 void pointsCalback(const std_msgs::String::ConstPtr& msg)
 {
   points_cmd = msg->data.c_str();
-  ROS_INFO("Points CMD heard: [%s]", points_cmd);
+  ROS_INFO("Points CMD heard: [%s]", points_cmd.c_str());
 }
 
 void lanesCalback(const std_msgs::String::ConstPtr& msg)
 {
   lanes_cmd = msg->data.c_str();
-  ROS_INFO("Lanes CMD heard: [%s]", points_cmd);
+  ROS_INFO("Lanes CMD heard: [%s]", points_cmd.c_str());
 }
 
 
@@ -29,6 +29,7 @@ int main(int argc,char **argv)
 	ros::Publisher cmd_pub = node.advertise<std_msgs::String>("planning/cmd", 1);
 	ros::Rate loop_rate(10);
   std_msgs::String msg;
+  ROS_INFO("Planning node started");
   while(ros::ok())
   {
     if(points_cmd == "keep")
@@ -55,7 +56,7 @@ int main(int argc,char **argv)
       cmd_pub.publish(msg);
       in_keep_state = false;
     }
-      
+    ros::spinOnce();
     loop_rate.sleep();
   }
 }
