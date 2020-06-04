@@ -75,5 +75,5 @@ then
 $ cd ~/catkin_ws
 $ catkin_make
 $ source devel/setup.bash
-$ roslaunch launch all-system.launch (or other launch files)
+$ roslaunch all-system.launch (or other launch files)
 ```
