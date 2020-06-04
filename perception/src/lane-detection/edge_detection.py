@@ -37,7 +37,7 @@ class LaneDetection:
 
         # if we don't have line poly, search using sliding window
         else:
-            leftx, lefty, rightx, righty, sliding = self.sliding_window(
+            leftx, lefty, rightx, righty = self.sliding_window(
                 nwindows=9, width=100)
         if self.ploty is None:
             # will used for plotting line, find x fitted
