@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="planning" name="behavior_planning" type="behavior_planning_node" output="screen"/>
+</launch>

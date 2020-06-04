@@ -1,0 +1,10 @@
+<launch>
+  <node pkg="sensors" name="camera_node" type="camera_pub.py" output="screen"/>
+  <node pkg="perception" name="perception_points_node" type="marks_pub.py" output="screen"/>
+  <node pkg="perception" name="perception_lanes_node" type="edge_pub.py" output="screen"/>
+
+  <node pkg="planning" name="behavior_planning" type="behavior_planning_node" output="screen"/>
+
+  <node pkg="fsm_control" name="dbw_fsm" type="dbw_fsm" output="screen"/>
+  <node pkg="fsm_control" name="servo_setter" type="servo_setter.py" output="screen"/>
+</launch>
