@@ -86,9 +86,9 @@ class LaneDetection:
 
         self.get_distance()
         if self.distance > 0:
-            self.turn_dir = "left"
+            self.turn_dir = "kleft"
         elif self.distance < 0:
-            self.turn_dir = "right"
+            self.turn_dir = "kright"
         else:
             self.turn_dir = "keep"
 

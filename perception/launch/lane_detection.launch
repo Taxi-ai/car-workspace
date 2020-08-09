@@ -1,4 +1,4 @@
 <launch>
-
+    <node pkg="sensors" name="camera_node" type="camera_pub.py" output="screen"/>
     <node pkg="perception" name="perception_lanes_node" type="edge_pub.py" output="screen"/>
 </launch>
