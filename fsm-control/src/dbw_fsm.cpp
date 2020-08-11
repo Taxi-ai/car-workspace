@@ -38,7 +38,9 @@ static string data_cmd ;
 float t_max_left=0.5;
 float t_max_right= -0.5;
 float t_center= 0.0;
-
+//adding keep_left and keep_right for very small turn
+const keep_left = 380;
+const keep_right = 340;
  // inputs data_cmd to change state
 
 static int throttle = THROTTLE_STOPPED_PWM;
@@ -231,22 +233,22 @@ int main(int argc, char **argv)
         	case KEEP_LANE:
             	 if (data_cmd == "kleft"){
 					        throttle = v;
-                  msg.angular.z  = steer+20;//t_center;//steer;
+                  msg.angular.z  = keep_left;//steer+20;//t_center;//steer;
 				          msg.linear.x = throttle;//throttle;
 									cout<<"Published msg = "<<msg.angular.z<<endl;
 				          pub.publish(msg);
-                  ros::Duration(1).sleep();
-                  data_cmd = "keep";
+                  //ros::Duration(1).sleep();
+                  //data_cmd = "keep";
                 }
 				       else if (data_cmd == "kright"){
 					        throttle = v;
    
-          				msg.angular.z  = steer-20;//t_center;//steer;
+          				msg.angular.z  = keep_right;//steer-20;//t_center;//steer;
           				msg.linear.x = throttle;//throttle;
 									cout<<"Published msg = "<<msg.angular.z<<endl;
           				pub.publish(msg);
-                  ros::Duration(1).sleep();
-                  data_cmd = "keep";
+                  //ros::Duration(1).sleep();
+                  //data_cmd = "keep";
 				       }
 				      else{
           				throttle = v;
