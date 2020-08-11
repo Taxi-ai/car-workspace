@@ -16,7 +16,7 @@ def camera_node():
     rate = rospy.Rate(10) # 10hz
     if test:
         rospack = rospkg.RosPack()
-        test_video_path = rospack.get_path('sensors') + "/scripts/project_video.mp4"
+        test_video_path = rospack.get_path('sensors') + "/../test-videos/lane.avi"
         if not os.path.isfile(test_video_path):
                 raise FileNotFoundError(test_video_path, " not Exist!")
         cam = cv2.VideoCapture(test_video_path) # for test
@@ -38,6 +38,7 @@ def camera_node():
         rate.sleep()
         if test:
             cv2.imshow("original",frame)
+            cv2.waitKey(0)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     # When everything done, release the capture
@@ -45,7 +46,7 @@ def camera_node():
     cv2.destroyAllWindows()
     
 if __name__ == '__main__':
-    test = False
+    test = True
     try:
         camera_node()
     except rospy.ROSInterruptException:

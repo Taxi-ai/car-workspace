@@ -233,6 +233,7 @@ int main(int argc, char **argv)
 					        throttle = v;
                   msg.angular.z  = steer+20;//t_center;//steer;
 				          msg.linear.x = throttle;//throttle;
+									cout<<"Published msg = "<<msg.angular.z<<endl;
 				          pub.publish(msg);
                   ros::Duration(1).sleep();
                   data_cmd = "keep";
@@ -242,17 +243,19 @@ int main(int argc, char **argv)
    
           				msg.angular.z  = steer-20;//t_center;//steer;
           				msg.linear.x = throttle;//throttle;
+									cout<<"Published msg = "<<msg.angular.z<<endl;
           				pub.publish(msg);
                   ros::Duration(1).sleep();
                   data_cmd = "keep";
 				       }
 				      else{
           				throttle = v;
-             
           				msg.angular.z  = CENTER_STEER;//t_center;//steer;
+									cout<<"Published msg = "<<msg.angular.z<<endl;
           				msg.linear.x = throttle;//throttle;
           				pub.publish(msg);
 				      }
+							
         	break;
         	
         	case STOP:

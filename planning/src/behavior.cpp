@@ -4,7 +4,7 @@
 #include "std_msgs/String.h"
 
 using namespace std;
-string lanes_cmd = "keep" , points_cmd = "ready";
+string lanes_cmd = "keep" , points_cmd = "keep";
 bool in_keep_state = false;
 
 void pointsCalback(const std_msgs::String::ConstPtr& msg)
@@ -16,7 +16,7 @@ void pointsCalback(const std_msgs::String::ConstPtr& msg)
 void lanesCalback(const std_msgs::String::ConstPtr& msg)
 {
   lanes_cmd = msg->data.c_str();
-  ROS_INFO("Lanes CMD heard: [%s]", points_cmd.c_str());
+  ROS_INFO("Lanes CMD heard: [%s]", lanes_cmd.c_str());
 }
 
 

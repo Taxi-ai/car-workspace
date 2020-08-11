@@ -44,7 +44,7 @@ class LaneDetection:
             self.ploty = np.linspace(
                 self.warped.shape[0] // 4, self.warped.shape[0] - 1, self.warped.shape[0])
 
-        print("left x = " + str(len(leftx)) + "right x = " + str(len(rightx)))
+        #print("left x = " + str(len(leftx)) + "right x = " + str(len(rightx)))
         # check if at least 100 pixels detected as line
         if len(leftx) > 100 and len(rightx) > 100:
             self.leftLine.detected = True
@@ -85,13 +85,14 @@ class LaneDetection:
             self.rightLine.detected = False
 
         self.get_distance()
+        print("left car offeset - right car offeset = ",self.distance)
         if self.distance > 0:
-            self.turn_dir = "left"
+            self.turn_dir = "kleft"
         elif self.distance < 0:
-            self.turn_dir = "right"
+            self.turn_dir = "kright"
         else:
             self.turn_dir = "keep"
-
+        print("direction is " + self.turn_dir)
     def drawLanes(self):
         if self.warped is None or self.leftLine.current_y is None:
             print("Can't draw lane lines before detect it!")

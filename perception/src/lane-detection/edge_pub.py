@@ -30,6 +30,7 @@ def callback(data):
 
 def talker():
     while not rospy.is_shutdown():
+        #rospy.loginfo("published direction is " + str(lane_detector.turn_dir))
         pub.publish(lane_detector.turn_dir)
         
         rate.sleep()
@@ -37,7 +38,7 @@ def talker():
 
 if __name__ == "__main__":
 
-    draw = False
+    draw = True
 
     src = np.float32([[50, 300], [590, 300], [640, 480], [0, 480]])
     dst = np.float32([[0, 0], [640, 0], [640, 480], [0, 480]])
