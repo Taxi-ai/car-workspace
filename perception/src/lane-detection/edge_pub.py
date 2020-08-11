@@ -38,7 +38,7 @@ def talker():
 
 if __name__ == "__main__":
 
-    draw = True
+    draw = False
 
     src = np.float32([[50, 300], [590, 300], [640, 480], [0, 480]])
     dst = np.float32([[0, 0], [640, 0], [640, 480], [0, 480]])
