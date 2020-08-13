@@ -85,14 +85,14 @@ class LaneDetection:
             self.rightLine.detected = False
 
         self.get_distance()
-        print("left car offeset - right car offeset = ",self.distance)
-        if self.distance > 0:
+        #print("left car offeset - right car offeset = ",self.distance)
+        if self.distance > 0.07:
             self.turn_dir = "kleft"
-        elif self.distance < 0:
+        elif self.distance < -0.09:
             self.turn_dir = "kright"
         else:
             self.turn_dir = "keep"
-        print("direction is " + self.turn_dir)
+        #print("direction is " + self.turn_dir)
     def drawLanes(self):
         if self.warped is None or self.leftLine.current_y is None:
             print("Can't draw lane lines before detect it!")

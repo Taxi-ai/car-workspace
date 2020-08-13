@@ -42,7 +42,7 @@ def servo_updater_cb(msg):
     global steer_pulse
     throttle_pulse =int( msg.linear.x)
     steer_pulse = int(msg.angular.z)
-    rospy.loginfo("throttle : %d  steer : %d "%(throttle_pulse ,steer_pulse))
+    #rospy.loginfo("throttle : %d  steer : %d "%(throttle_pulse ,steer_pulse))
 
 rospy.init_node('servo_setter')
 

@@ -53,7 +53,7 @@ if __name__ == "__main__":
     # init node, cam sub and lane pub
     rospack = rospkg.RosPack()
     rospy.init_node('perception_lanes_node', anonymous=False)
-    rate = rospy.Rate(10)  # 10hz
+    rate = rospy.Rate(1)  # 10hz
 
     rospy.Subscriber('sensors/camera_topic', Image, callback)
     pub = rospy.Publisher('perception/lanes_topic', String)
