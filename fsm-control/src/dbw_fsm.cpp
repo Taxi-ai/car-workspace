@@ -27,7 +27,7 @@ static tcar_state car_state = READY;
 static string data_cmd ;
 
 #define MAX_LEFT_STEER  455
-#define CENTER_STEER 	360
+#define CENTER_STEER 	372
 #define MAX_RIGHT_STEER 265
 
 #define THROTTLE_FORWARD_PWM  460      //#pwm value for max forward throttle
@@ -39,8 +39,8 @@ float t_max_left=0.5;
 float t_max_right= -0.5;
 float t_center= 0.0;
 //adding keep_left and keep_right for very small turn
-const keep_left = 380;
-const keep_right = 340;
+const float keep_left = 400;
+const float keep_right = 320;
  // inputs data_cmd to change state
 
 static int throttle = THROTTLE_STOPPED_PWM;
@@ -52,7 +52,7 @@ int v = 400;//470; // const speed
 static void ready_func(void)
 {
     
-    ROS_INFO("from READY");
+    //ROS_INFO("from READY");
     if (data_cmd == "keep")
         car_state = KEEP_LANE;
 
@@ -61,7 +61,7 @@ static void ready_func(void)
 static void keep_lane_func(void)
 {
     
-	 ROS_INFO("From KEEP_LANE_Func");
+	 //ROS_INFO("From KEEP_LANE_Func");
     if (data_cmd == "stop")
         car_state = STOP;
 	//else if (data_cmd == "kleft")
@@ -99,7 +99,7 @@ static void stop_func(void)
 static void common_transition(void)
 {
     //transition to main state : KEEP_LANE or STOP
-    ROS_INFO("From common_transition");
+    //ROS_INFO("From common_transition");
     if (data_cmd == "keep")
         car_state = KEEP_LANE;
     else if (data_cmd == "stop")
@@ -143,12 +143,12 @@ string get_state(void)
 
 //periodic function
 void select_state_task(void)
-{ cout<<"start transition from : "<<get_state()<<endl;
-cout<<"hi : "<<data_cmd<<endl;
+{ //cout<<"start transition from : "<<get_state()<<endl;
+//cout<<"hi : "<<data_cmd<<endl;
     switch(car_state)
     {
         case READY:
-            cout<<"hi : READY : "<<car_state<<endl;
+            //cout<<"hi : READY : "<<car_state<<endl;
             ready_func();                
             //cout<<"hi"<<car_state<<endl;
         break;
@@ -183,15 +183,15 @@ cout<<"hi : "<<data_cmd<<endl;
             //cout<<car_state<<endl;
         break;
     }
-    cout<<"current_state: "<<get_state()<<endl;
+    //cout<<"current_state: "<<get_state()<<endl;
 }
 
 
 static void planning_cb(const std_msgs::String::ConstPtr& msg)
 {
      data_cmd = msg->data.c_str(); 
-     ROS_INFO("I heard: [%s]", msg->data.c_str());
-     cout<<"data_cmd : 	"<<data_cmd<<endl;
+     //ROS_INFO("I heard: [%s]", msg->data.c_str());
+     //cout<<"data_cmd : 	"<<data_cmd<<endl;
      //select_state_task();
     
      
@@ -237,8 +237,11 @@ int main(int argc, char **argv)
 				          msg.linear.x = throttle;//throttle;
 									cout<<"Published msg = "<<msg.angular.z<<endl;
 				          pub.publish(msg);
-                  //ros::Duration(1).sleep();
-                  //data_cmd = "keep";
+                  ros::Duration(0.5).sleep();
+                  msg.angular.z  = CENTER_STEER;
+                  pub.publish(msg);
+                  //ros::Duration(0.5).sleep();
+                  data_cmd = "keep";
                 }
 				       else if (data_cmd == "kright"){
 					        throttle = v;
@@ -247,8 +250,11 @@ int main(int argc, char **argv)
           				msg.linear.x = throttle;//throttle;
 									cout<<"Published msg = "<<msg.angular.z<<endl;
           				pub.publish(msg);
-                  //ros::Duration(1).sleep();
-                  //data_cmd = "keep";
+                  ros::Duration(0.5).sleep();
+                  msg.angular.z  = CENTER_STEER;
+                  pub.publish(msg);
+                  //ros::Duration(0.5).sleep();
+                  data_cmd = "keep";
 				       }
 				      else{
           				throttle = v;
@@ -379,7 +385,7 @@ int main(int argc, char **argv)
 				      data_cmd = "keep";
         	break;
     	}
-		ROS_INFO("listening");
+		//ROS_INFO("listening");
 		
 		ros::spinOnce();
 		loop_rate.sleep();
