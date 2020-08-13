@@ -6,7 +6,11 @@ import sys
 import cv2
 import numpy as np
 
-
+def scale_abs(x, m = 255):
+  x = np.absolute(x)
+  x = np.uint8(m * x / np.max(x))
+  return x
+  
 class Error(Exception):
     pass
 

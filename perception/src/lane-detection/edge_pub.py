@@ -22,9 +22,9 @@ def callback(data):
 
     lane_detector(img)
     if draw and lane_detector.threshold_img is not None:
-        cv2.imshow("Binary Image",lane_detector.warped)
+        cv2.imshow("Binary Image",lane_detector.test)
         lane_detector.drawLanes()
-        cv2.imshow("lane lines",lane_detector.img)
+        cv2.imshow("lane lines",lane_detector.out_img)
         cv2.waitKey(1)
         
 
@@ -38,7 +38,7 @@ def talker():
 
 if __name__ == "__main__":
 
-    draw = False
+    draw = True
 
     src = np.float32([[50, 300], [590, 300], [640, 480], [0, 480]])
     dst = np.float32([[0, 0], [640, 0], [640, 480], [0, 480]])
